@@ -29,7 +29,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private SpriteRenderer spriteRenderer;
 
     [Header("Зворотний звʼязок")]
-    [SerializeField, Range(1f, 20f)]    private float hardLandingSpeed = 9f;
+    // Через fallMultiplier звичайний стрибок приземляється на ~20 од/с,
+    // тому поріг вищий, ніж у методичці (9): трясе лише падіння з висоти
+    [SerializeField, Range(1f, 40f)]    private float hardLandingSpeed = 25f;
     [SerializeField] private CameraShake cameraShake;
     [SerializeField, Range(0.05f, 0.3f)] private float shakeDuration = 0.12f;
     [SerializeField, Range(0.02f, 0.3f)] private float shakeStrength = 0.12f;
