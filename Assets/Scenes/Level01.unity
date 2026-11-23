@@ -419,9 +419,9 @@ Camera:
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
-    x: 0.0013614704
+    x: 0.0015673981
     y: 0.0027855153
-    width: 0.99659634
+    width: 0.99686515
     height: 0.99442893
   near clip plane: 0.3
   far clip plane: 1000
@@ -847,8 +847,8 @@ SpriteRenderer:
   m_Color: {r: 0.43529412, g: 0.6392157, b: 0.72156864, a: 1}
   m_FlipX: 0
   m_FlipY: 0
-  m_DrawMode: 0
-  m_Size: {x: 12, y: 11.1875}
+  m_DrawMode: 2
+  m_Size: {x: 24, y: 11.1875}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
