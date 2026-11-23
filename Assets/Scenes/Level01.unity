@@ -775,6 +775,7 @@ GameObject:
   - component: {fileID: 1179208395}
   - component: {fileID: 1179208394}
   - component: {fileID: 1179208393}
+  - component: {fileID: 1179208397}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -922,6 +923,42 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1179208397
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1179208391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e27f0f0057dc684ea90c8ab6acaabc1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
+  maxSpeed: 8
+  acceleration: 70
+  deceleration: 90
+  groundCheck: {fileID: 1567881659}
+  groundCheckRadius: 0.15
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  jumpHeight: 3
+  baseGravity: 3
+  fallMultiplier: 2.2
+  lowJumpMultiplier: 3.5
+  coyoteTime: 0.12
+  jumpBufferTime: 0.15
+  animator: {fileID: 0}
+  spriteRenderer: {fileID: 1179208395}
+  hardLandingSpeed: 9
+  cameraShake: {fileID: 0}
+  shakeDuration: 0.12
+  shakeStrength: 0.12
+  source: {fileID: 0}
+  footsteps: []
+  pitchVariance: 0.12
+  stepInterval: 0.32
 --- !u!1 &1380070755
 GameObject:
   m_ObjectHideFlags: 0
