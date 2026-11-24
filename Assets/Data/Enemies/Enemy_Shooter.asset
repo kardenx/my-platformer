@@ -20,7 +20,7 @@ MonoBehaviour:
   verticalTolerance: 1.5
   chaseExitFactor: 1.2
   loseTargetTime: 1
-  stopDistance: 5
+  stopDistance: 3
   maxHealth: 20
   damage: 8
   telegraphTime: 0.5

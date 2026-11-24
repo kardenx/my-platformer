@@ -97,6 +97,9 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        // пауза - ввід не читаємо
+        if (PauseController.IsPaused) return;
+
         isGrounded = CheckGround();
 
         // інакше подвійний стрибок

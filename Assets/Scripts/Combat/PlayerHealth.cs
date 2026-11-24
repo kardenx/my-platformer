@@ -8,6 +8,22 @@ public class PlayerHealth : Health
     // контролер глушить відкидання
     [SerializeField, Range(0f, 0.5f)] private float knockbackStun = 0.2f;
 
+    [Header("Канали подій")]
+    [SerializeField] private IntEventSO healthChanged;
+    [SerializeField] private IntEventSO maxHealthChanged;
+
+    // start бо hud вже підписався в onenable
+    private void Start()
+    {
+        if (maxHealthChanged != null) maxHealthChanged.Raise(Max);
+        if (healthChanged != null) healthChanged.Raise(Current);
+    }
+
+    protected override void OnHealthChanged()
+    {
+        if (healthChanged != null) healthChanged.Raise(Current);
+    }
+
     protected override void OnDamaged()
     {
         if (controller != null) controller.Stun(knockbackStun);
@@ -15,8 +31,7 @@ public class PlayerHealth : Health
 
     protected override void Die()
     {
-        // на чекпоінт
         respawn.Respawn();
-        ResetHealth();
+        ResetHealth();   // сам кине подію
     }
 }

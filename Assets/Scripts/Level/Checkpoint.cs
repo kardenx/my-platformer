@@ -6,6 +6,11 @@ public class Checkpoint : MonoBehaviour
     {
         // по компоненту, не по тегу
         if (other.TryGetComponent<PlayerRespawn>(out var respawn))
+        {
             respawn.SetCheckpoint(transform.position);
+
+            // момент зберегтись
+            SaveSystem.Save(GameProgress.ToData());
+        }
     }
 }

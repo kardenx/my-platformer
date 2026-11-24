@@ -20,7 +20,11 @@ public class Health : MonoBehaviour, IDamageable
         ResetHealth();
     }
 
-    public void ResetHealth() => current = maxHealth;
+    public void ResetHealth()
+    {
+        current = maxHealth;
+        OnHealthChanged();
+    }
 
     // макс хп з ассета
     public void Configure(int newMax)
@@ -38,6 +42,7 @@ public class Health : MonoBehaviour, IDamageable
         invulnerableUntil = Time.time + invulnerableTime;
 
         current = Mathf.Max(0, current - amount);
+        OnHealthChanged();
 
         // відкидання
         Vector2 dir = ((Vector2)transform.position - sourcePosition).normalized;
@@ -47,6 +52,8 @@ public class Health : MonoBehaviour, IDamageable
         else              OnDamaged();
     }
 
+    // число змінилось - кому треба, той перекриє
+    protected virtual void OnHealthChanged() { }
     protected virtual void OnDamaged() { }
     protected virtual void Die() => gameObject.SetActive(false);
 }
