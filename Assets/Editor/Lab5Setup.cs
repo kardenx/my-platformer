@@ -176,7 +176,7 @@ public static class Lab5Setup
             s.patrolSpeed = 0.8f; s.chaseSpeed = 1.8f; s.chaseRange = 5f;
             s.attackRange = 1.5f; s.attackRadius = 0.8f;
             s.maxHealth = 90; s.damage = 20; s.telegraphTime = 0.8f; s.recoveryTime = 0.7f;
-            s.tint = Hex("#6FA3B8"); s.sizeScale = 1.35f;
+            s.tint = Hex("#6E52A8"); s.sizeScale = 1.35f;
         });
 
         // рашер
@@ -184,7 +184,7 @@ public static class Lab5Setup
         {
             s.patrolSpeed = 2.5f; s.chaseSpeed = 6f; s.chaseRange = 9f;
             s.maxHealth = 12; s.damage = 8; s.telegraphTime = 0.2f; s.recoveryTime = 0.15f;
-            s.tint = Hex("#5CE1E6"); s.sizeScale = 0.85f;
+            s.tint = Hex("#D3BDF5"); s.sizeScale = 0.85f;
         });
 
         // стрілець
@@ -193,7 +193,7 @@ public static class Lab5Setup
             s.patrolSpeed = 1f; s.chaseSpeed = 1.2f; s.chaseRange = 8f;
             s.attackRange = 6f; s.stopDistance = 5f;
             s.maxHealth = 20; s.damage = 8; s.telegraphTime = 0.5f; s.recoveryTime = 0.9f;
-            s.tint = Hex("#B084E8"); s.sizeScale = 1f; s.ranged = true;
+            s.tint = Hex("#8F6BCB"); s.sizeScale = 1f; s.ranged = true;
         });
 
         log.Add("Ассети: Enemy_Walker, Enemy_Tank, Enemy_Rusher, Enemy_Shooter у " + DataDir);

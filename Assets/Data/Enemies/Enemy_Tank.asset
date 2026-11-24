@@ -26,7 +26,7 @@ MonoBehaviour:
   telegraphTime: 0.8
   recoveryTime: 0.7
   hurtTime: 0.3
-  tint: {r: 0.43529412, g: 0.6392157, b: 0.72156864, a: 1}
+  tint: {r: 0.43137255, g: 0.32156864, b: 0.65882355, a: 1}
   sizeScale: 1.35
   telegraphSfx: {fileID: 8300000, guid: fa6b22b3e4c0636428ec6d9077c96e4f, type: 3}
   ranged: 0
