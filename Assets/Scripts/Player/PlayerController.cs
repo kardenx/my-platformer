@@ -67,6 +67,10 @@ public class PlayerController : MonoBehaviour
     private float coyoteCounter;
     private float jumpBufferCounter;
     private float stepTimer;
+    private float stunnedUntil;       // після удару ворога керування на мить віддано фізиці
+
+    // Викликає PlayerHealth, щоб відкидання не «зʼїдалося» розгоном/гальмуванням
+    public void Stun(float duration) => stunnedUntil = Time.time + duration;
 
     private float JumpVelocity =>
         Mathf.Sqrt(2f * Mathf.Abs(Physics2D.gravity.y) * baseGravity * jumpHeight);
@@ -120,10 +124,13 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         // Горизонталь: гальмуємо швидше, ніж розганяємось
-        float target = moveInput * maxSpeed;
-        float rate = Mathf.Abs(target) > InputDeadZone ? acceleration : deceleration;
-        float x = Mathf.MoveTowards(body.linearVelocity.x, target, rate * Time.fixedDeltaTime);
-        body.linearVelocity = new Vector2(x, body.linearVelocity.y);
+        if (Time.time >= stunnedUntil)
+        {
+            float target = moveInput * maxSpeed;
+            float rate = Mathf.Abs(target) > InputDeadZone ? acceleration : deceleration;
+            float x = Mathf.MoveTowards(body.linearVelocity.x, target, rate * Time.fixedDeltaTime);
+            body.linearVelocity = new Vector2(x, body.linearVelocity.y);
+        }
 
         // Змінна висота стрибка через гравітацію, а не обрізання швидкості
         if (body.linearVelocity.y < 0f)
