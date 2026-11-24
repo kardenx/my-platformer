@@ -420,12 +420,15 @@ public static class Lab6Setup
 
     private static void WirePlayer(Dictionary<string, IntEventSO> ev)
     {
-        var p = Find("Player");
-        if (p == null || !p.TryGetComponent(out PlayerHealth ph)) return;
+        // шукаємо сам компонент, не по імені
+        var ph = Object.FindAnyObjectByType<PlayerHealth>(FindObjectsInactive.Include);
+        if (ph == null) { Debug.LogWarning("Lab6: PlayerHealth не знайдено"); return; }
         var so = new SerializedObject(ph);
         so.FindProperty("healthChanged").objectReferenceValue = ev["PlayerHPChanged"];
         so.FindProperty("maxHealthChanged").objectReferenceValue = ev["PlayerMaxHPChanged"];
-        so.ApplyModifiedPropertiesWithoutUndo();
+        so.ApplyModifiedProperties();
+        EditorUtility.SetDirty(ph);
+        EditorSceneManager.MarkSceneDirty(ph.gameObject.scene);
     }
 
     private static Transform EnsureRoot(string name)
