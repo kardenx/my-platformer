@@ -65,8 +65,18 @@ public class PlayerController : MonoBehaviour
     private float stepTimer;
     private float stunnedUntil;
 
+    private bool bouncing;
+
     // щоб відкидання було видно
     public void Stun(float duration) => stunnedUntil = Time.time + duration;
+
+    // відскок від ворога, low jump його не гасить
+    public void Bounce(float velocity)
+    {
+        bouncing = true;
+        body.gravityScale = baseGravity;
+        body.linearVelocity = new Vector2(body.linearVelocity.x, velocity);
+    }
 
     private float JumpVelocity =>
         Mathf.Sqrt(2f * Mathf.Abs(Physics2D.gravity.y) * baseGravity * jumpHeight);
@@ -127,10 +137,12 @@ public class PlayerController : MonoBehaviour
             body.linearVelocity = new Vector2(x, body.linearVelocity.y);
         }
 
+        if (body.linearVelocity.y <= 0f) bouncing = false;
+
         // змінна висота через гравітацію
         if (body.linearVelocity.y < 0f)
             body.gravityScale = baseGravity * fallMultiplier;
-        else if (body.linearVelocity.y > 0f && !controls.Player.Jump.IsPressed())
+        else if (body.linearVelocity.y > 0f && !controls.Player.Jump.IsPressed() && !bouncing)
             body.gravityScale = baseGravity * lowJumpMultiplier;   // відпустили - нижче
         else
             body.gravityScale = baseGravity;

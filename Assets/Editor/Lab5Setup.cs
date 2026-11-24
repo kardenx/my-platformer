@@ -87,8 +87,13 @@ public static class Lab5Setup
         var die   = Clip("Enemy_Die",       10, false, Enumerable.Range(1, 5).Select(i => $"enemy-die-{i}").ToArray());
 
         string path = $"{AnimDir}/Enemy.controller";
-        AssetDatabase.DeleteAsset(path);
-        var ac = AnimatorController.CreateAnimatorControllerAtPath(path);
+        // не видаляти ассет, інакше вороги в сцені гублять посилання
+        var ac = AssetDatabase.LoadAssetAtPath<AnimatorController>(path);
+        if (ac == null) ac = AnimatorController.CreateAnimatorControllerAtPath(path);
+        foreach (var p in ac.parameters) ac.RemoveParameter(p);
+        var oldSm = ac.layers[0].stateMachine;
+        foreach (var t in oldSm.anyStateTransitions) oldSm.RemoveAnyStateTransition(t);
+        foreach (var st in oldSm.states) oldSm.RemoveState(st.state);
         ac.AddParameter("Speed", AnimatorControllerParameterType.Float);
         ac.AddParameter("Telegraph", AnimatorControllerParameterType.Trigger);
         ac.AddParameter("Hurt", AnimatorControllerParameterType.Trigger);

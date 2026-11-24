@@ -11,7 +11,13 @@ public class PlayerStomp : MonoBehaviour
     [SerializeField, Range(1f, 20f)] private float bounceForce = 9f;
 
     private Rigidbody2D body;
-    private void Awake() => body = GetComponent<Rigidbody2D>();
+    private PlayerController controller;
+
+    private void Awake()
+    {
+        body = GetComponent<Rigidbody2D>();
+        controller = GetComponent<PlayerController>();
+    }
 
     private void Update()
     {
@@ -24,7 +30,10 @@ public class PlayerStomp : MonoBehaviour
         if (hit.TryGetComponent(out IDamageable target))
         {
             target.TakeDamage(damage, transform.position);
-            body.linearVelocity = new Vector2(body.linearVelocity.x, bounceForce);
+
+            // через контролер, інакше low jump зрізає відскок
+            if (controller != null) controller.Bounce(bounceForce);
+            else body.linearVelocity = new Vector2(body.linearVelocity.x, bounceForce);
         }
     }
 
