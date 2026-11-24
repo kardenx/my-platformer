@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.Pool;
 
-// Контекст ворога (ctx): тіло, аніматор, датчики, ціль. Стани користуються лише ним
 [RequireComponent(typeof(Rigidbody2D))]
 public class EnemyController : MonoBehaviour
 {
@@ -9,10 +8,10 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private EnemyStatsSO stats;
 
     [Header("Точки")]
-    [SerializeField] private Transform groundCheck;    // під ступнею
-    [SerializeField] private Transform edgeCheck;      // перед носком, НИЖЧЕ ступні
-    [SerializeField] private Transform wallCheck;      // перед носком, на рівні тулуба
-    [SerializeField] private Transform attackPoint;    // звідки йде удар
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private Transform edgeCheck;   // нижче ступні
+    [SerializeField] private Transform wallCheck;   // на рівні тулуба
+    [SerializeField] private Transform attackPoint;
 
     [Header("Шари")]
     [SerializeField] private LayerMask groundLayer;
@@ -25,7 +24,7 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private Projectile projectilePrefab;
     [SerializeField, Range(1, 50)] private int poolCapacity = 20;
 
-    // Імена параметрів аніматора - в одному місці, щоб не помилитися в літері
+    // параметри аніматора
     public static readonly int SpeedHash     = Animator.StringToHash("Speed");
     public static readonly int TelegraphHash = Animator.StringToHash("Telegraph");
     public static readonly int HurtHash      = Animator.StringToHash("Hurt");
@@ -45,7 +44,6 @@ public class EnemyController : MonoBehaviour
 
     public int Facing { get; private set; } = 1;
 
-    // Структурні величини: їх не крутить дизайнер, тому вони не в ассеті
     private const float FacingDeadZone = 0.1f;
     private const float ProbeRadius    = 0.1f;
 
@@ -57,13 +55,12 @@ public class EnemyController : MonoBehaviour
         Animator = GetComponentInChildren<Animator>();
         Machine  = new StateMachine();
 
-        // Префаб не може зберігати посилання на обʼєкт сцени - гравця шукаємо в коді
+        // префаб не тримає посилання на сцену
         Target = GameObject.FindGameObjectWithTag("Player").transform;
 
-        // Максимум здоровʼя приходить з ассета
         GetComponent<Health>().Configure(stats.maxHealth);
 
-        // Вигляд теж з ассета - тому інший тип ворога не потребує нових спрайтів
+        // колір і розмір з ассета
         GetComponentInChildren<SpriteRenderer>().color = stats.tint;
         ApplyScale();
 
@@ -92,11 +89,11 @@ public class EnemyController : MonoBehaviour
 
     private void OnDestroy() => pool?.Clear();
 
-    // Відстань по горизонталі: висоту окремо перевіряє TargetOnSameLevel
+    // тільки по x
     public float DistanceToTarget =>
         Mathf.Abs(Target.position.x - transform.position.x);
 
-    // Рівень порівнюємо по ступнях, а не по початках координат
+    // по ногах
     public bool TargetOnSameLevel =>
         Mathf.Abs(Target.position.y - groundCheck.position.y) <= stats.verticalTolerance;
 
@@ -118,7 +115,7 @@ public class EnemyController : MonoBehaviour
         ApplyScale();
     }
 
-    // Масштаб і дзеркалення разом: інакше розворот скидав би розмір з ассета
+    // розмір + напрямок разом
     private void ApplyScale() =>
         transform.localScale = new Vector3(stats.sizeScale * Facing, stats.sizeScale, 1f);
 
@@ -126,7 +123,7 @@ public class EnemyController : MonoBehaviour
     {
         float dx = Target.position.x - transform.position.x;
 
-        // Без мертвої зони ворог під гравцем розвертався б щокадру
+        // щоб не крутився під гравцем
         if (Mathf.Abs(dx) < FacingDeadZone) return;
 
         int dir = dx > 0f ? 1 : -1;
@@ -136,11 +133,11 @@ public class EnemyController : MonoBehaviour
     public bool IsGrounded =>
         Physics2D.OverlapCircle(groundCheck.position, ProbeRadius, groundLayer);
 
-    // Під носком НЕМАЄ землі - попереду край платформи
+    // край платформи
     public bool AtEdge() =>
         !Physics2D.OverlapCircle(edgeCheck.position, ProbeRadius, groundLayer);
 
-    // Перед носком Є перешкода - попереду стіна
+    // стіна попереду
     public bool AtWall() =>
         Physics2D.OverlapCircle(wallCheck.position, ProbeRadius, groundLayer);
 
@@ -150,7 +147,6 @@ public class EnemyController : MonoBehaviour
             audioSource.PlayOneShot(stats.telegraphSfx);
     }
 
-    // Удар через інтерфейс: ворог не знає, кого саме б'є
     public void DealDamage()
     {
         Collider2D hit = Physics2D.OverlapCircle(
@@ -165,7 +161,7 @@ public class EnemyController : MonoBehaviour
         if (pool == null) return;
         Projectile p = pool.Get();
 
-        // Стан скидаємо ЯВНО: перевикористаний снаряд памʼятає старий
+        // скидаємо снаряд
         p.transform.position = attackPoint.position;
         p.OnFinished = Release;
         p.Launch(new Vector2(Facing, 0f), stats.damage);
@@ -177,7 +173,6 @@ public class EnemyController : MonoBehaviour
         pool.Release(p);
     }
 
-    // Радіуси й датчики у вікні Scene
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;

@@ -13,14 +13,14 @@ public class ChaseState : IState
     {
         float d = ctx.DistanceToTarget;
 
-        // Ціль втрачено, якщо вона задалеко АБО на іншому рівні.
-        // Множник - гістерезис: поріг виходу більший за поріг входу
+        // загубили - далеко або не на тому рівні
+        // гістерезис
         bool lost = d > ctx.Stats.chaseRange * ctx.Stats.chaseExitFactor
                     || !ctx.TargetOnSameLevel;
 
         if (lost)
         {
-            // Не кидаємо переслідування миттєво: гравець міг стрибнути
+            // трохи ще біжимо
             lostTimer += Time.deltaTime;
 
             if (lostTimer >= ctx.Stats.loseTargetTime)
@@ -36,7 +36,7 @@ public class ChaseState : IState
 
         ctx.FaceTarget();
 
-        // Впритул не підбігаємо, у стіну не впираємось
+        // не впритул і не в стіну
         bool canAdvance = d > ctx.Stats.stopDistance && !ctx.AtWall() && !ctx.AtEdge();
 
         if (canAdvance) ctx.Move(ctx.Stats.chaseSpeed);

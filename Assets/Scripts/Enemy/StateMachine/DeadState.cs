@@ -9,6 +9,6 @@ public class DeadState : IState
         ctx.Animator.SetTrigger(EnemyController.DieHash);
     }
 
-    public void Tick() { }   // кінцевий стан: виходу немає і не має бути
+    public void Tick() { }   // кінець
     public void Exit() { }
 }

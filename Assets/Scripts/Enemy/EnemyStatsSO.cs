@@ -1,6 +1,5 @@
 using UnityEngine;
 
-// Усі числа ворога - у файлі даних. Новий тип ворога = новий ассет, а не новий клас
 [CreateAssetMenu(fileName = "EnemyStats", menuName = "Game/Enemy Stats")]
 public class EnemyStatsSO : ScriptableObject
 {
@@ -13,17 +12,13 @@ public class EnemyStatsSO : ScriptableObject
     [Range(0.5f, 8f)] public float attackRange  = 1.2f;
     [Range(0.2f, 2f)] public float attackRadius = 0.6f;
 
-    // Наскільки гравець може бути вище або нижче, щоб ворог
-    // усе ще вважав його "своєю" ціллю
+    // допуск по висоті
     [Range(0.5f, 6f)] public float verticalTolerance = 1.5f;
 
-    // Поріг виходу з переслідування більший за поріг входу
     [Range(1f, 2f)]   public float chaseExitFactor = 1.2f;
 
-    // Скільки ворог іще біжить за ціллю, яку втратив
     [Range(0.1f, 3f)] public float loseTargetTime = 1f;
 
-    // Ближче за цю відстань ворог уже не підбігає
     [Range(0.1f, 3f)] public float stopDistance = 0.6f;
 
     [Header("Бій")]
@@ -43,5 +38,5 @@ public class EnemyStatsSO : ScriptableObject
     public AudioClip telegraphSfx;
 
     [Header("Тип атаки")]
-    public bool ranged = false;   // true - стрілець
+    public bool ranged = false;   // стрілець
 }

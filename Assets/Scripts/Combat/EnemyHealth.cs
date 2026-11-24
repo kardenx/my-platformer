@@ -4,7 +4,7 @@ public class EnemyHealth : Health
 {
     [SerializeField] private EnemyController controller;
     [SerializeField] private Collider2D hitbox;
-    [SerializeField, Range(0.2f, 3f)] private float destroyDelay = 1.2f;   // встигає програтися смерть
+    [SerializeField, Range(0.2f, 3f)] private float destroyDelay = 1.2f;
 
     protected override void OnDamaged()
     {
@@ -15,7 +15,7 @@ public class EnemyHealth : Health
     {
         controller.Machine.ChangeState(controller.DeadState);
 
-        // Обидва рядки обовʼязкові: інакше «труп» далі отримує урон і бʼє гравця
+        // щоб труп не бив
         hitbox.enabled = false;
         controller.enabled = false;
 

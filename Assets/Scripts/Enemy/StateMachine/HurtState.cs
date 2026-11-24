@@ -11,7 +11,6 @@ public class HurtState : IState
     {
         timer = ctx.Stats.hurtTime;
         ctx.Animator.SetTrigger(EnemyController.HurtHash);
-        // Швидкість не чіпаємо: відкидання вже задало її в Health
     }
 
     public void Tick()
@@ -20,6 +19,5 @@ public class HurtState : IState
         if (timer <= 0f) ctx.Machine.ChangeState(ctx.ChaseState);
     }
 
-    // Хто звів тригер, той його й скидає
     public void Exit() => ctx.Animator.ResetTrigger(EnemyController.HurtHash);
 }

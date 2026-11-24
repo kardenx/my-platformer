@@ -16,11 +16,11 @@ public class ParallaxLayer : MonoBehaviour
         camStartPosition = cam.position;
     }
 
-    // LateUpdate: камера вже перемістилася цього кадру - тепер підлаштовуємо фон
+    // в lateupdate бо камера вже зсунулась
     private void LateUpdate()
     {
         Vector3 camDelta = cam.position - camStartPosition;
-        camDelta.z = 0f;   // глибину шару не чіпаємо
+        camDelta.z = 0f;
         transform.position = startPosition + camDelta * parallaxFactor;
     }
 }

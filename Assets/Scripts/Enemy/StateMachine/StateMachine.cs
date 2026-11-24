@@ -1,11 +1,10 @@
-// Хто перемикає стани
 public class StateMachine
 {
     public IState Current { get; private set; }
 
     public void ChangeState(IState next)
     {
-        if (next == Current) return;   // повторний вхід не потрібен
+        if (next == Current) return;
 
         Current?.Exit();
         Current = next;

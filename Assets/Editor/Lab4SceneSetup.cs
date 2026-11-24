@@ -6,16 +6,15 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-// Одноразовий інструмент ЛР4: дописує в сцену Level01 обʼєкти, які не малюються пензлем.
-// Меню: Tools → Lab4 → Setup Scene. Повторний запуск безпечний: наявне не дублюється.
+// сетап сцени лр4
+// Tools/Lab4/Setup Scene
 public static class Lab4SceneSetup
 {
     private const int InteractableLayer = 10;
     private const string CheckpointPrefabPath = "Assets/Prefabs/Checkpoint.prefab";
 
-    // Розрахунок паралаксу: рівень x -3…99, видимо 20 юнітів,
-    // тож центр камери ходить від 7 до 89 (шлях 82).
-    // Потрібна ширина шару = 20 + (1 - f) * 82, центр = 7 + 41 * (1 - f).
+    // рівень 102, екран 20, шлях камери 82
+    // ширина = 20 + (1 - f) * 82
     private const float CamMinX = 7f;
     private const float CamPath = 82f;
     private const float ViewWidth = 20f;
@@ -48,14 +47,14 @@ public static class Lab4SceneSetup
         EditorUtility.DisplayDialog("Lab4 Setup", "Готово, сцену збережено.\n\n" + string.Join("\n", log), "OK");
     }
 
-    // ---------- Tilemap-шари ----------
+    // тайлмапи
     private static void SetupTilemaps(List<string> log)
     {
         Transform hazards = Find("Hazards");
         if (hazards != null)
         {
             var col = Ensure<TilemapCollider2D>(hazards.gameObject);
-            col.isTrigger = true;                     // шипи - тригер, а не підлога
+            col.isTrigger = true;
             Ensure<Hazard>(hazards.gameObject);
             hazards.gameObject.layer = LayerMask.NameToLayer("Hazard");
             log.Add("Hazards: Tilemap Collider 2D (Is Trigger) + Hazard");
@@ -64,7 +63,7 @@ public static class Lab4SceneSetup
         Transform decor = Find("Decor");
         if (decor != null && decor.TryGetComponent(out Tilemap decorMap))
         {
-            decorMap.tileAnchor = new Vector3(0.5f, 0f, 0f);       // кущі стоять на землі
+            decorMap.tileAnchor = new Vector3(0.5f, 0f, 0f);
             decorMap.color = Hex("#8FA3AC");                        // декор тихіший за геометрію
             SetSorting(decor.GetComponent<TilemapRenderer>(), "Environment", 5);
             foreach (var c in decor.GetComponents<Collider2D>()) Object.DestroyImmediate(c);
@@ -86,7 +85,7 @@ public static class Lab4SceneSetup
         }
     }
 
-    // ---------- Гравець ----------
+    // гравець
     private static void SetupPlayer(Transform player, List<string> log)
     {
         Ensure<PlayerRespawn>(player.gameObject);
@@ -98,7 +97,7 @@ public static class Lab4SceneSetup
             point = new GameObject("InteractPoint").transform;
             point.SetParent(player, false);
         }
-        point.localPosition = new Vector3(0f, 1.6f, 0f);   // рівень грудей (зріст ~2,6)
+        point.localPosition = new Vector3(0f, 1.6f, 0f);   // груди
 
         var pc = player.GetComponent<PlayerController>();
         if (pc != null)
@@ -112,7 +111,7 @@ public static class Lab4SceneSetup
         log.Add("Player: PlayerRespawn, Impulse Source, InteractPoint (0; 1,6), шар взаємодії = Interactable");
     }
 
-    // ---------- Контрольні точки ----------
+    // чекпоінти
     private static void SetupCheckpoints(Transform parent, List<string> log)
     {
         var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(CheckpointPrefabPath);
@@ -145,7 +144,7 @@ public static class Lab4SceneSetup
         go.transform.position = pos;
     }
 
-    // ---------- Важіль ----------
+    // важіль
     private static void SetupLever(Transform parent, Transform leverPlatform, List<string> log)
     {
         Transform t = Find("Lever");
@@ -169,11 +168,11 @@ public static class Lab4SceneSetup
         so.FindProperty("handle").objectReferenceValue = sr;
         so.ApplyModifiedPropertiesWithoutUndo();
 
-        if (leverPlatform != null) leverPlatform.gameObject.SetActive(false);   // без важеля яму не пройти
+        if (leverPlatform != null) leverPlatform.gameObject.SetActive(false);   // на старті вимкнена
         log.Add("Lever (57,5; 1), шар Interactable, ціль LeverPlatform (вимкнена на старті)");
     }
 
-    // ---------- Паралакс ----------
+    // паралакс
     private static void SetupParallax(Transform env, List<string> log)
     {
         Transform root = Find("Parallax");
@@ -184,7 +183,7 @@ public static class Lab4SceneSetup
         MakeLayer(root, "BG_Far", "Assets/Art/Sprites/Background/background.png", 0.2f, 0, "#5F8797", 4f);
         MakeLayer(root, "BG_Near", "Assets/Art/Tilesets/mountains.png", 0.5f, 1, "#6FA3B8", 2.5f);
 
-        // Старі нерухомі фони з ЛР2 більше не потрібні
+        // старі фони не треба
         foreach (var old in new[] { "Mountains", "Graveyard" })
         {
             Transform o = Find(old);
@@ -204,7 +203,7 @@ public static class Lab4SceneSetup
         var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
         var sr = Ensure<SpriteRenderer>(go);
         sr.sprite = sprite;
-        sr.drawMode = SpriteDrawMode.Tiled;   // повторюємо картинку по горизонталі
+        sr.drawMode = SpriteDrawMode.Tiled;
         sr.tileMode = SpriteTileMode.Continuous;
         sr.size = new Vector2(LayerWidth(factor), sprite != null ? sprite.bounds.size.y : 10f);
         sr.color = Hex(tint);
@@ -219,7 +218,7 @@ public static class Lab4SceneSetup
         so.ApplyModifiedPropertiesWithoutUndo();
     }
 
-    // ---------- Межі рівня ----------
+    // межі рівня
     private static Collider2D SetupLevelBounds(Transform parent, List<string> log)
     {
         Transform t = Find("LevelBounds");
@@ -228,20 +227,20 @@ public static class Lab4SceneSetup
         go.transform.position = Vector3.zero;
 
         var box = Ensure<BoxCollider2D>(go);
-        box.isTrigger = true;                      // інакше гравець битиметься об невидиму стінку
-        box.size = new Vector2(102f, 17f);         // x -3…99, y -4…13
+        box.isTrigger = true;   // тригер
+        box.size = new Vector2(102f, 17f);
         box.offset = new Vector2(48f, 4.5f);
         log.Add("LevelBounds: Box Collider 2D (Is Trigger) 102 × 17, Offset (48; 4,5)");
         return box;
     }
 
-    // ---------- Cinemachine ----------
+    // cinemachine
     private static void SetupCinemachine(Transform player, Collider2D bounds, List<string> log)
     {
         Camera main = Camera.main;
         if (main != null)
         {
-            GameObjectUtility.RemoveMonoBehavioursWithMissingScript(main.gameObject);   // старий CameraShake
+            GameObjectUtility.RemoveMonoBehavioursWithMissingScript(main.gameObject);
             Ensure<CinemachineBrain>(main.gameObject);
         }
 
@@ -274,7 +273,6 @@ public static class Lab4SceneSetup
         log.Add("CinemachineCamera: Position Composer (Dead Zone 0,15 × 0,15, Lookahead 0,3 / 4, Damping 0,7), Confiner 2D, Impulse Listener, Pixel Perfect; Brain на Main Camera");
     }
 
-    // ---------- Допоміжне ----------
     private static T Ensure<T>(GameObject go) where T : Component =>
         go.TryGetComponent(out T c) ? c : go.AddComponent<T>();
 
@@ -287,7 +285,7 @@ public static class Lab4SceneSetup
 
     private static Color Hex(string hex) => ColorUtility.TryParseHtmlString(hex, out var c) ? c : Color.white;
 
-    // Шукає і серед вимкнених обʼєктів (GameObject.Find їх не бачить)
+    // з вимкненими теж
     private static Transform Find(string name)
     {
         foreach (var root in EditorSceneManager.GetActiveScene().GetRootGameObjects())

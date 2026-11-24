@@ -8,9 +8,8 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Audio;
 
-// Одноразовий інструмент ЛР5: імпорт спрайтів ворога, кліпи й граф аніматора,
-// ассети EnemyStatsSO, префаби ворога й снаряда, вороги на рівні, бій для гравця.
-// Меню: Tools → Lab5 → Setup Enemies. Повторний запуск не дублює наявне.
+// сетап ворогів лр5
+// Tools/Lab5/Setup Enemies
 public static class Lab5Setup
 {
     private const string ArtDir   = "Assets/Art/Enemies";
@@ -49,7 +48,7 @@ public static class Lab5Setup
         EditorUtility.DisplayDialog("Lab5 Setup", "Готово, сцену збережено.\n\n" + string.Join("\n", log), "OK");
     }
 
-    // ---------- Імпорт: як у героя - PPU 16, Point, без стиснення, Pivot Bottom ----------
+    // імпорт як у героя
     private static void ImportSprites(List<string> log)
     {
         foreach (var path in Directory.GetFiles(ArtDir, "*.png").Select(p => p.Replace('\\', '/')))
@@ -76,7 +75,7 @@ public static class Lab5Setup
 
     private static Sprite S(string name) => AssetDatabase.LoadAssetAtPath<Sprite>($"{ArtDir}/{name}.png");
 
-    // ---------- Кліпи й граф аніматора (стани повторюють автомат) ----------
+    // кліпи + аніматор
     private static AnimatorController BuildAnimator(List<string> log)
     {
         Directory.CreateDirectory(AnimDir);
@@ -87,7 +86,7 @@ public static class Lab5Setup
         var die   = Clip("Enemy_Die",       10, false, Enumerable.Range(1, 5).Select(i => $"enemy-die-{i}").ToArray());
 
         string path = $"{AnimDir}/Enemy.controller";
-        AssetDatabase.DeleteAsset(path);   // граф будуємо начисто
+        AssetDatabase.DeleteAsset(path);
         var ac = AnimatorController.CreateAnimatorControllerAtPath(path);
         ac.AddParameter("Speed", AnimatorControllerParameterType.Float);
         ac.AddParameter("Telegraph", AnimatorControllerParameterType.Trigger);
@@ -104,11 +103,11 @@ public static class Lab5Setup
         sm.defaultState = sIdle;
         sm.anyStatePosition = new Vector3(560, 280);
 
-        // Ходьба: без Exit Time, коротке змішування
+        // ходьба
         var t1 = sIdle.AddTransition(sRun);  Setup(t1, false, 0f, 0.05f); t1.AddCondition(AnimatorConditionMode.Greater, 0.1f, "Speed");
         var t2 = sRun.AddTransition(sIdle);  Setup(t2, false, 0f, 0.05f); t2.AddCondition(AnimatorConditionMode.Less, 0.1f, "Speed");
 
-        // Події з Any State: без Exit Time і без переходу в себе
+        // any state
         foreach (var (state, trigger) in new[] { (sTele, "Telegraph"), (sHurt, "Hurt"), (sDie, "Die") })
         {
             var t = sm.AddAnyStateTransition(state);
@@ -117,10 +116,10 @@ public static class Lab5Setup
             t.AddCondition(AnimatorConditionMode.If, 0f, trigger);
         }
 
-        // Повернення: з Exit Time = 1, щоб кліп доіграв до кінця
+        // назад в idle після кліпу
         var b1 = sTele.AddTransition(sIdle); Setup(b1, true, 1f, 0f);
         var b2 = sHurt.AddTransition(sIdle); Setup(b2, true, 1f, 0f);
-        // Enemy_Die - кінцевий, виходу немає
+        // з die нікуди
 
         AssetDatabase.SaveAssets();
         log.Add("Аніматор: 5 кліпів, параметри Speed/Telegraph/Hurt/Die, переходи з Any State");
@@ -146,7 +145,6 @@ public static class Lab5Setup
         var keys = new ObjectReferenceKeyframe[frames.Length + 1];
         for (int i = 0; i < frames.Length; i++)
             keys[i] = new ObjectReferenceKeyframe { time = i / fps, value = S(frames[i]) };
-        // останній ключ тримає останній кадр на всю його тривалість
         keys[frames.Length] = new ObjectReferenceKeyframe { time = frames.Length / fps, value = S(frames[^1]) };
         AnimationUtility.SetObjectReferenceCurve(clip, binding, keys);
 
@@ -157,17 +155,16 @@ public static class Lab5Setup
         return clip;
     }
 
-    // ---------- Ассети даних: типи ворогів відрізняються лише цифрами ----------
+    // ассети ворогів
     private static Dictionary<string, EnemyStatsSO> CreateStats(List<string> log)
     {
         Directory.CreateDirectory(DataDir);
         var sfx = AssetDatabase.LoadAssetAtPath<AudioClip>(TelegraphSfxPath);
         var result = new Dictionary<string, EnemyStatsSO>();
 
-        // Базовий: середні значення
         result["Enemy_Walker"] = Stats("Enemy_Walker", sfx, s => { });
 
-        // Танк: «чи вмієш ти вичекати?» - повільний, довгий замах, багато здоровʼя
+        // танк
         result["Enemy_Tank"] = Stats("Enemy_Tank", sfx, s =>
         {
             s.patrolSpeed = 0.8f; s.chaseSpeed = 1.8f; s.chaseRange = 5f;
@@ -176,7 +173,7 @@ public static class Lab5Setup
             s.tint = Hex("#6FA3B8"); s.sizeScale = 1.35f;
         });
 
-        // Рашер: «чи вмієш ти відступити?» - швидкий, майже без попередження, крихкий
+        // рашер
         result["Enemy_Rusher"] = Stats("Enemy_Rusher", sfx, s =>
         {
             s.patrolSpeed = 2.5f; s.chaseSpeed = 6f; s.chaseRange = 9f;
@@ -184,7 +181,7 @@ public static class Lab5Setup
             s.tint = Hex("#5CE1E6"); s.sizeScale = 0.85f;
         });
 
-        // Стрілець: «чи вмієш ти скоротити дистанцію?» - тримає відстань і стріляє
+        // стрілець
         result["Enemy_Shooter"] = Stats("Enemy_Shooter", sfx, s =>
         {
             s.patrolSpeed = 1f; s.chaseSpeed = 1.2f; s.chaseRange = 8f;
@@ -201,7 +198,7 @@ public static class Lab5Setup
     {
         string path = $"{DataDir}/{name}.asset";
         var s = AssetDatabase.LoadAssetAtPath<EnemyStatsSO>(path);
-        if (s != null) return s;   // уже налаштований вручну - не переписуємо
+        if (s != null) return s;   // не перетирати свої правки
         s = ScriptableObject.CreateInstance<EnemyStatsSO>();
         s.telegraphSfx = sfx;
         configure(s);
@@ -209,7 +206,7 @@ public static class Lab5Setup
         return s;
     }
 
-    // ---------- Снаряд ----------
+    // снаряд
     private static Projectile BuildProjectile(List<string> log)
     {
         var go = new GameObject("Projectile");
@@ -234,7 +231,7 @@ public static class Lab5Setup
         return prefab.GetComponent<Projectile>();
     }
 
-    // ---------- Префаб ворога ----------
+    // префаб ворога
     private static GameObject BuildEnemyPrefab(AnimatorController ac, EnemyStatsSO walker, Projectile projectile, List<string> log)
     {
         var root = new GameObject("Enemy") { layer = L("Enemy") };
@@ -263,7 +260,7 @@ public static class Lab5Setup
         capsule.size = new Vector2(1f, 2.6f);
         capsule.offset = new Vector2(0f, 1.3f);
         capsule.sharedMaterial = AssetDatabase.LoadAssetAtPath<PhysicsMaterial2D>("Assets/Settings/PlayerNoFriction.physicsMaterial2D");
-        // Гравець і інші вороги проходять крізь ворога: виняток на самому колайдері
+        // крізь гравця і ворогів
         capsule.excludeLayers = (1 << L("Player")) | (1 << L("Enemy"));
 
         var audio = root.AddComponent<AudioSource>();
@@ -310,7 +307,7 @@ public static class Lab5Setup
         return go;
     }
 
-    // ---------- Гравець: тег, шар, здоровʼя, атака згори ----------
+    // гравець
     private static void SetupPlayer(List<string> log)
     {
         var player = Find("Player");
@@ -320,7 +317,7 @@ public static class Lab5Setup
         player.layer = L("Player");
 
         var respawn = player.GetComponent<PlayerRespawn>();
-        // TryGetComponent, а не «??»: у редакторі відсутній компонент повертається як «фальшивий null»
+        // ?? тут не працює
         if (!player.TryGetComponent(out PlayerHealth ph)) ph = player.AddComponent<PlayerHealth>();
         var hs = new SerializedObject(ph);
         hs.FindProperty("maxHealth").intValue = 30;
@@ -348,16 +345,16 @@ public static class Lab5Setup
         log.Add("Player: тег Player, шар Player, PlayerHealth (30 HP, 0,8 с невразливості), PlayerStomp + StompPoint");
     }
 
-    // ---------- Вороги на рівні: один префаб, різне лише поле Stats ----------
+    // вороги на рівні
     private static void PlaceEnemies(GameObject prefab, Dictionary<string, EnemyStatsSO> stats, List<string> log)
     {
         var parent = Find("GAMEPLAY");
         var places = new (string name, string stats, float x)[]
         {
-            ("Enemy_Walker",  "Enemy_Walker",  45f),   // середина рівня, після біту 2
-            ("Enemy_Shooter", "Enemy_Shooter", 78f),   // одразу за ямою: стріляє, поки гравець перебирається
-            ("Enemy_Rusher",  "Enemy_Rusher",  84f),   // відкрита ділянка - є куди відступати
-            ("Enemy_Tank",    "Enemy_Tank",    91f),   // біля фінішу між статуєю і стіною - не обійти
+            ("Enemy_Walker",  "Enemy_Walker",  45f),
+            ("Enemy_Shooter", "Enemy_Shooter", 78f),   // за ямою
+            ("Enemy_Rusher",  "Enemy_Rusher",  84f),   // є куди відступати
+            ("Enemy_Tank",    "Enemy_Tank",    91f),   // біля фінішу
         };
 
         foreach (var (name, statsName, x) in places)

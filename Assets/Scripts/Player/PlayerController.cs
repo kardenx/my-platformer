@@ -1,4 +1,4 @@
-using Unity.Cinemachine;   // у Cinemachine для Unity 6 простір імен саме такий
+using Unity.Cinemachine;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -16,7 +16,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Стрибок")]
     [SerializeField, Range(0.5f, 8f)] private float jumpHeight = 3f;
-    // Базовий масштаб гравітації: на ньому тримається розрахунок висоти стрибка
+    // від неї рахується висота
     [SerializeField, Range(0.5f, 8f)] private float baseGravity = 3f;
     [SerializeField, Range(1f, 6f)]   private float fallMultiplier = 2.2f;
     [SerializeField, Range(1f, 8f)]   private float lowJumpMultiplier = 3.5f;
@@ -30,18 +30,15 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private SpriteRenderer spriteRenderer;
 
     [Header("Зворотний звʼязок")]
-    // Через fallMultiplier звичайний стрибок приземляється на ~20 од/с,
-    // тому поріг вищий, ніж у методичці (9): трясе лише падіння з висоти
+    // з 9 трясло на кожному стрибку
     [SerializeField, Range(1f, 40f)]    private float hardLandingSpeed = 25f;
-    // Тряска тепер через імпульс Cinemachine: CinemachineBrain щокадру
-    // переписує трансформ камери, і стара корутина CameraShake не працювала б.
-    // Тривалість і форму задає Impulse Definition на самому компоненті
+    // тряска через імпульс, корутина вже не працює
     [SerializeField] private CinemachineImpulseSource impulseSource;
     [SerializeField, Range(0.05f, 2f)] private float impulseForce = 0.3f;
 
     [Header("Звук")]
     [SerializeField] private AudioSource source;
-    [SerializeField] private AudioClip[] footsteps;   // щонайменше ТРИ кліпи
+    [SerializeField] private AudioClip[] footsteps;   // мін 3
     [SerializeField, Range(0f, 0.3f)]   private float pitchVariance = 0.12f;
     [SerializeField, Range(0.1f, 0.8f)] private float stepInterval = 0.32f;
 
@@ -52,7 +49,6 @@ public class PlayerController : MonoBehaviour
 
     private static readonly int SpeedHash = Animator.StringToHash("Speed");
 
-    // Пороги "майже нуль", щоб не порівнювати float з нулем напряму
     private const float InputDeadZone = 0.01f;
     private const float RunSoundMinSpeed = 0.5f;
 
@@ -62,14 +58,14 @@ public class PlayerController : MonoBehaviour
 
     private bool isGrounded;
     private bool wasGrounded;
-    private float fallSpeed;          // найбільша швидкість падіння перед дотиком
+    private float fallSpeed;
 
     private float coyoteCounter;
     private float jumpBufferCounter;
     private float stepTimer;
-    private float stunnedUntil;       // після удару ворога керування на мить віддано фізиці
+    private float stunnedUntil;
 
-    // Викликає PlayerHealth, щоб відкидання не «зʼїдалося» розгоном/гальмуванням
+    // щоб відкидання було видно
     public void Stun(float duration) => stunnedUntil = Time.time + duration;
 
     private float JumpVelocity =>
@@ -84,7 +80,7 @@ public class PlayerController : MonoBehaviour
         if (impulseSource == null) impulseSource = GetComponent<CinemachineImpulseSource>();
     }
 
-    // Без Enable введення не приходить, і помилки при цьому не буде
+    // без enable інпут мовчить
     private void OnEnable()  => controls.Player.Enable();
     private void OnDisable() => controls.Player.Disable();
     private void OnDestroy() => controls.Dispose();
@@ -93,16 +89,16 @@ public class PlayerController : MonoBehaviour
     {
         isGrounded = CheckGround();
 
-        // Поповнюємо coyote лише коли стоїмо, а не летимо вгору (інакше подвійний стрибок)
+        // інакше подвійний стрибок
         bool canRefill = isGrounded && body.linearVelocity.y <= InputDeadZone;
         coyoteCounter = canRefill ? coyoteTime : coyoteCounter - Time.deltaTime;
 
-        // Натиск не виконуємо одразу, а запамʼятовуємо в таймер
+        // буфер стрибка
         jumpBufferCounter = controls.Player.Jump.WasPressedThisFrame()
             ? jumpBufferTime
             : jumpBufferCounter - Time.deltaTime;
 
-        // Стрибок, коли активні ОБИДВА таймери; обнуляємо обидва
+        // обидва таймери, обидва в нуль
         if (jumpBufferCounter > 0f && coyoteCounter > 0f)
         {
             Jump();
@@ -110,7 +106,6 @@ public class PlayerController : MonoBehaviour
             coyoteCounter = 0f;
         }
 
-        // Введення читаємо в Update: FixedUpdate може пропустити короткий натиск
         moveInput = controls.Player.Move.ReadValue<Vector2>().x;
 
         if (controls.Player.Interact.WasPressedThisFrame())
@@ -123,7 +118,7 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // Горизонталь: гальмуємо швидше, ніж розганяємось
+        // гальмування швидше за розгін
         if (Time.time >= stunnedUntil)
         {
             float target = moveInput * maxSpeed;
@@ -132,27 +127,26 @@ public class PlayerController : MonoBehaviour
             body.linearVelocity = new Vector2(x, body.linearVelocity.y);
         }
 
-        // Змінна висота стрибка через гравітацію, а не обрізання швидкості
+        // змінна висота через гравітацію
         if (body.linearVelocity.y < 0f)
-            body.gravityScale = baseGravity * fallMultiplier;          // падаємо швидше
+            body.gravityScale = baseGravity * fallMultiplier;
         else if (body.linearVelocity.y > 0f && !controls.Player.Jump.IsPressed())
-            body.gravityScale = baseGravity * lowJumpMultiplier;       // відпустили - короткий стрибок
+            body.gravityScale = baseGravity * lowJumpMultiplier;   // відпустили - нижче
         else
             body.gravityScale = baseGravity;
     }
 
-    // Коло перекриває всю ширину ніг, а не одну точку
+    // коло, не промінь
     private bool CheckGround() =>
         Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
 
     private void Jump()
     {
-        // Фіксуємо масштаб ДО імпульсу, інакше злетимо з чужою гравітацією
+        // спершу гравітація
         body.gravityScale = baseGravity;
         body.linearVelocity = new Vector2(body.linearVelocity.x, JumpVelocity);
     }
 
-    // Контролер не знає ні про важіль, ні про платформу - лише про IInteractable
     private void TryInteract()
     {
         if (interactPoint == null) return;
@@ -169,7 +163,7 @@ public class PlayerController : MonoBehaviour
         if (!isGrounded)
             fallSpeed = Mathf.Max(fallSpeed, -body.linearVelocity.y);
 
-        if (isGrounded && !wasGrounded)   // саме ПЕРЕХІД false → true, а не стан
+        if (isGrounded && !wasGrounded)   // саме момент приземлення
             OnLanded(fallSpeed);
 
         if (isGrounded) fallSpeed = 0f;
@@ -178,7 +172,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnLanded(float speed)
     {
-        // Тільки жорстке приземлення. Зіскок зі сходинки ефекту не дає
+        // тільки жорстке
         if (speed < hardLandingSpeed) return;
 
         if (impulseSource != null) impulseSource.GenerateImpulseWithForce(impulseForce);
@@ -186,11 +180,11 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateVisuals()
     {
-        // Джерело істини - фактична швидкість тіла, а не натиснута клавіша
+        // по швидкості, не по клавіші
         if (animator != null)
             animator.SetFloat(SpeedHash, Mathf.Abs(body.linearVelocity.x));
 
-        // flipX, а не мінусовий масштаб: інакше дочірній GroundCheck переїде
+        // flipX щоб groundcheck не їздив
         if (spriteRenderer != null && Mathf.Abs(moveInput) > InputDeadZone)
             spriteRenderer.flipX = moveInput < 0f;
     }
@@ -199,7 +193,6 @@ public class PlayerController : MonoBehaviour
     {
         bool running = isGrounded && Mathf.Abs(body.linearVelocity.x) > RunSoundMinSpeed;
 
-        // Не біжимо - скидаємо таймер, щоб перший крок після старту був одразу
         if (!running) { stepTimer = 0f; return; }
 
         stepTimer -= Time.deltaTime;
@@ -214,15 +207,14 @@ public class PlayerController : MonoBehaviour
     {
         if (source == null || footsteps == null || footsteps.Length == 0) return;
 
-        // 1) різні кліпи прибирають впізнаваність звуку
+        // рандомний кліп
         AudioClip clip = footsteps[Random.Range(0, footsteps.Length)];
 
-        // 2) розкид висоти тону прибирає механічність повторення
+        // і трохи тон
         source.pitch = 1f + Random.Range(-pitchVariance, pitchVariance);
         source.PlayOneShot(clip);
     }
 
-    // Без візуалізації датчик налагоджувати неможливо
     private void OnDrawGizmosSelected()
     {
         if (groundCheck != null)

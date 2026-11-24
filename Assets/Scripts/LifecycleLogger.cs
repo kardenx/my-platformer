@@ -1,9 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Виводить у Console етапи життєвого циклу MonoBehaviour
-/// з номером кадру, щоб побачити порядок виклику методів.
-/// </summary>
 public class LifecycleLogger : MonoBehaviour
 {
     [SerializeField] private string label = "A";
@@ -18,7 +14,7 @@ public class LifecycleLogger : MonoBehaviour
 
     private void Update()
     {
-        // Логуємо лише перші 3 кадри, щоб не засмічувати Console.
+        // тільки 3 кадри
         if (updateCount < 3)
         {
             updateCount++;

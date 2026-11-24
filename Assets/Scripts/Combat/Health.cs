@@ -1,6 +1,5 @@
 using UnityEngine;
 
-// Спільне здоровʼя для ворога і гравця. На обʼєкти вішають лише спадкоємців
 [RequireComponent(typeof(Rigidbody2D))]
 public class Health : MonoBehaviour, IDamageable
 {
@@ -23,7 +22,7 @@ public class Health : MonoBehaviour, IDamageable
 
     public void ResetHealth() => current = maxHealth;
 
-    // Ворогу максимум приходить з ассета - викликає EnemyController
+    // макс хп з ассета
     public void Configure(int newMax)
     {
         maxHealth = newMax;
@@ -34,13 +33,13 @@ public class Health : MonoBehaviour, IDamageable
     {
         if (current <= 0) return;
 
-        // Кадри невразливості: без них дотик знімає здоровʼя щокадру
+        // i-frames
         if (Time.time < invulnerableUntil) return;
         invulnerableUntil = Time.time + invulnerableTime;
 
         current = Mathf.Max(0, current - amount);
 
-        // Відкидання: і зворотний звʼязок, і механіка - дає час відійти
+        // відкидання
         Vector2 dir = ((Vector2)transform.position - sourcePosition).normalized;
         body.AddForce(dir * knockbackForce, ForceMode2D.Impulse);
 
@@ -48,7 +47,6 @@ public class Health : MonoBehaviour, IDamageable
         else              OnDamaged();
     }
 
-    // Два гачки для спадкоємців - єдине, що відрізняє ворога від гравця
     protected virtual void OnDamaged() { }
     protected virtual void Die() => gameObject.SetActive(false);
 }

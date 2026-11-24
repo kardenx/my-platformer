@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// Атака гравця: урон від стрибка ворогові на голову
+// стрибок на голову
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerStomp : MonoBehaviour
 {
@@ -15,7 +15,7 @@ public class PlayerStomp : MonoBehaviour
 
     private void Update()
     {
-        // Бʼємо тільки якщо падаємо: інакше ворог гине від дотику збоку
+        // тільки коли падаємо
         if (body.linearVelocity.y >= 0f) return;
 
         Collider2D hit = Physics2D.OverlapCircle(stompPoint.position, radius, enemyLayer);

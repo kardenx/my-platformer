@@ -4,8 +4,7 @@ public class Checkpoint : MonoBehaviour
 {
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // Не перевіряємо тег - перевіряємо наявність компонента.
-        // Так точка працює з будь-ким, у кого є респавн
+        // по компоненту, не по тегу
         if (other.TryGetComponent<PlayerRespawn>(out var respawn))
             respawn.SetCheckpoint(transform.position);
     }

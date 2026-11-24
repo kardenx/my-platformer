@@ -2,11 +2,10 @@ using UnityEngine;
 
 public class PlayerHealth : Health
 {
-    [SerializeField] private PlayerRespawn respawn;            // з лабораторної 4
+    [SerializeField] private PlayerRespawn respawn;
     [SerializeField] private PlayerController controller;
 
-    // Контролер щокадру задає горизонтальну швидкість і «зʼїдає» відкидання,
-    // тому на мить віддаємо тіло фізиці
+    // контролер глушить відкидання
     [SerializeField, Range(0f, 0.5f)] private float knockbackStun = 0.2f;
 
     protected override void OnDamaged()
@@ -16,7 +15,7 @@ public class PlayerHealth : Health
 
     protected override void Die()
     {
-        // Гравець не знищується - повертається на контрольну точку
+        // на чекпоінт
         respawn.Respawn();
         ResetHealth();
     }

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// Атака стрільця: та сама структура, що й у ближньої, але замість удару - постріл
+// як мілі тільки стріляє
 public class RangedAttackState : IState
 {
     private readonly EnemyController ctx;

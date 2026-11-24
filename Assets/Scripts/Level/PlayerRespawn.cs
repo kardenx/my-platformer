@@ -1,6 +1,5 @@
 using UnityEngine;
 
-// Памʼятає останню контрольну точку й повертає на неї
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerRespawn : MonoBehaviour
 {
@@ -10,7 +9,7 @@ public class PlayerRespawn : MonoBehaviour
     private void Awake()
     {
         body = GetComponent<Rigidbody2D>();
-        checkpoint = transform.position;   // старт рівня - перша точка
+        checkpoint = transform.position;
     }
 
     public void SetCheckpoint(Vector3 position) => checkpoint = position;
@@ -19,8 +18,7 @@ public class PlayerRespawn : MonoBehaviour
     {
         transform.position = checkpoint;
 
-        // Обовʼязково: інакше персонаж зʼявиться з накопиченою
-        // швидкістю падіння й одразу полетить униз
+        // скидаємо швидкість, бо падав би далі
         body.linearVelocity = Vector2.zero;
     }
 }

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// Три фази: підготовка (телеграфування) → удар → відновлення
+// замах - удар - пауза
 public class MeleeAttackState : IState
 {
     private readonly EnemyController ctx;
@@ -16,7 +16,7 @@ public class MeleeAttackState : IState
         struck = false;
         timer  = ctx.Stats.telegraphTime;
 
-        // Телеграфування - у ВХОДІ в стан
+        // телеграф одразу
         ctx.Animator.SetTrigger(EnemyController.TelegraphHash);
         ctx.PlayTelegraph();
     }
@@ -30,11 +30,11 @@ public class MeleeAttackState : IState
         {
             ctx.DealDamage();
             struck = true;
-            timer  = ctx.Stats.recoveryTime;   // пауза відновлення
+            timer  = ctx.Stats.recoveryTime;
             return;
         }
 
-        // Обовʼязковий вихід: стан без виходу - застиглий ворог
+        // вихід назад у chase
         ctx.Machine.ChangeState(ctx.ChaseState);
     }
 

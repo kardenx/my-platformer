@@ -7,8 +7,7 @@ public class PatrolState : IState
 
     public void Tick()
     {
-        // Спершу розворот, потім рух. Розвертаємось лише стоячи
-        // на землі: у повітрі AtEdge() істинний в обидва боки
+        // розворот тільки на землі
         if (ctx.IsGrounded && (ctx.AtEdge() || ctx.AtWall()))
             ctx.Flip();
 

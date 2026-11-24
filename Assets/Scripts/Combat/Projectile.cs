@@ -8,7 +8,7 @@ public class Projectile : MonoBehaviour
     [SerializeField, Range(0.5f, 10f)] private float lifetime = 3f;
     [SerializeField] private LayerMask targetLayers;
 
-    public Action<Projectile> OnFinished;   // повернення в пул
+    public Action<Projectile> OnFinished;   // в пул
 
     private int damage;
     private float dieAt;
@@ -31,8 +31,7 @@ public class Projectile : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // Реагуємо тільки на шари з маски: снаряд народжується всередині
-        // тригера меж рівня і поряд із колайдером стрільця
+        // тільки по масці, інакше зникає одразу
         if ((targetLayers.value & (1 << other.gameObject.layer)) == 0) return;
 
         if (other.TryGetComponent(out IDamageable target))
