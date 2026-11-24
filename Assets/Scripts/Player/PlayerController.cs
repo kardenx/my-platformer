@@ -1,3 +1,4 @@
+using Unity.Cinemachine;   // у Cinemachine для Unity 6 простір імен саме такий
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -32,15 +33,22 @@ public class PlayerController : MonoBehaviour
     // Через fallMultiplier звичайний стрибок приземляється на ~20 од/с,
     // тому поріг вищий, ніж у методичці (9): трясе лише падіння з висоти
     [SerializeField, Range(1f, 40f)]    private float hardLandingSpeed = 25f;
-    [SerializeField] private CameraShake cameraShake;
-    [SerializeField, Range(0.05f, 0.3f)] private float shakeDuration = 0.12f;
-    [SerializeField, Range(0.02f, 0.3f)] private float shakeStrength = 0.12f;
+    // Тряска тепер через імпульс Cinemachine: CinemachineBrain щокадру
+    // переписує трансформ камери, і стара корутина CameraShake не працювала б.
+    // Тривалість і форму задає Impulse Definition на самому компоненті
+    [SerializeField] private CinemachineImpulseSource impulseSource;
+    [SerializeField, Range(0.05f, 2f)] private float impulseForce = 0.3f;
 
     [Header("Звук")]
     [SerializeField] private AudioSource source;
     [SerializeField] private AudioClip[] footsteps;   // щонайменше ТРИ кліпи
     [SerializeField, Range(0f, 0.3f)]   private float pitchVariance = 0.12f;
     [SerializeField, Range(0.1f, 0.8f)] private float stepInterval = 0.32f;
+
+    [Header("Взаємодія")]
+    [SerializeField] private Transform interactPoint;
+    [SerializeField, Range(0.2f, 1.5f)] private float interactRadius = 0.6f;
+    [SerializeField] private LayerMask interactableLayer;
 
     private static readonly int SpeedHash = Animator.StringToHash("Speed");
 
@@ -69,8 +77,7 @@ public class PlayerController : MonoBehaviour
         body.gravityScale = baseGravity;
         controls = new PlayerControls();
 
-        // Префаб не може зберігати посилання на обʼєкт сцени, тож шукаємо самі
-        if (cameraShake == null) cameraShake = FindAnyObjectByType<CameraShake>();
+        if (impulseSource == null) impulseSource = GetComponent<CinemachineImpulseSource>();
     }
 
     // Без Enable введення не приходить, і помилки при цьому не буде
@@ -101,6 +108,9 @@ public class PlayerController : MonoBehaviour
 
         // Введення читаємо в Update: FixedUpdate може пропустити короткий натиск
         moveInput = controls.Player.Move.ReadValue<Vector2>().x;
+
+        if (controls.Player.Interact.WasPressedThisFrame())
+            TryInteract();
 
         UpdateFootsteps();
         CheckLanding();
@@ -135,6 +145,18 @@ public class PlayerController : MonoBehaviour
         body.linearVelocity = new Vector2(body.linearVelocity.x, JumpVelocity);
     }
 
+    // Контролер не знає ні про важіль, ні про платформу - лише про IInteractable
+    private void TryInteract()
+    {
+        if (interactPoint == null) return;
+
+        Collider2D hit = Physics2D.OverlapCircle(
+            interactPoint.position, interactRadius, interactableLayer);
+
+        if (hit != null && hit.TryGetComponent(out IInteractable target))
+            target.Interact();
+    }
+
     private void CheckLanding()
     {
         if (!isGrounded)
@@ -152,7 +174,7 @@ public class PlayerController : MonoBehaviour
         // Тільки жорстке приземлення. Зіскок зі сходинки ефекту не дає
         if (speed < hardLandingSpeed) return;
 
-        if (cameraShake != null) cameraShake.Shake(shakeDuration, shakeStrength);
+        if (impulseSource != null) impulseSource.GenerateImpulseWithForce(impulseForce);
     }
 
     private void UpdateVisuals()
@@ -196,8 +218,16 @@ public class PlayerController : MonoBehaviour
     // Без візуалізації датчик налагоджувати неможливо
     private void OnDrawGizmosSelected()
     {
-        if (groundCheck == null) return;
-        Gizmos.color = Application.isPlaying && isGrounded ? Color.green : Color.red;
-        Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        if (groundCheck != null)
+        {
+            Gizmos.color = Application.isPlaying && isGrounded ? Color.green : Color.red;
+            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        }
+
+        if (interactPoint != null)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireSphere(interactPoint.position, interactRadius);
+        }
     }
 }
