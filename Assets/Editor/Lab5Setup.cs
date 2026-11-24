@@ -37,6 +37,7 @@ public static class Lab5Setup
         var stats = CreateStats(log);
         var projectile = BuildProjectile(log);
         var enemy = BuildEnemyPrefab(controller, stats["Enemy_Walker"], projectile, log);
+        SolidGround(log);
         SetupPlayer(log);
         PlaceEnemies(enemy, stats, log);
 
@@ -305,6 +306,18 @@ public static class Lab5Setup
         go.transform.SetParent(parent.transform, false);
         go.transform.localPosition = local;
         return go;
+    }
+
+    // outlines - пуста всередині, датчики під ногами нічого не бачать
+    private static void SolidGround(List<string> log)
+    {
+        var ground = Find("Ground");
+        if (ground != null && ground.TryGetComponent(out CompositeCollider2D comp))
+        {
+            comp.geometryType = CompositeCollider2D.GeometryType.Polygons;
+            comp.GenerateGeometry();
+            log.Add("Ground: Composite Collider 2D → Geometry Type = Polygons");
+        }
     }
 
     // гравець
