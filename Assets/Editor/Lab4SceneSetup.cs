@@ -64,7 +64,7 @@ public static class Lab4SceneSetup
         if (decor != null && decor.TryGetComponent(out Tilemap decorMap))
         {
             decorMap.tileAnchor = new Vector3(0.5f, 0f, 0f);
-            decorMap.color = Hex("#8FA3AC");                        // декор тихіший за геометрію
+            decorMap.color = Hex("#8FA3AC");   // тихіше
             SetSorting(decor.GetComponent<TilemapRenderer>(), "Environment", 5);
             foreach (var c in decor.GetComponents<Collider2D>()) Object.DestroyImmediate(c);
             log.Add("Decor: Tile Anchor (0.5, 0), приглушений колір, без колайдера");
